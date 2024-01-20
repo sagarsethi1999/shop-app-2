@@ -21,6 +21,7 @@ exports.postAddProduct = (req, res, next) => {
     description: description
   }).then( result => {
     console.log('Created Product');
+    res.redirect('/admin/products')
   })
   .catch( err => {
     console.log(err);
@@ -33,15 +34,23 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDescription = req.body.description;
-  const updatedProduct = new Product( prodId,updatedTitle,updatedImageUrl,updatedDescription,updatedPrice)
-
-  updatedProduct.save()
-  .then(() => {
-    res.redirect('/admin/products')
+ 
+  Product.findByPk(prodId)
+  .then(product => {
+    product.title = updatedTitle;
+    product.price = updatedPrice;
+    product.description = updatedDescription;
+    product.imageUrl = updatedImageUrl;
+    return product.save();
   })
-  .catch(err => console.log(err));
+  .then(result => {
+    console.log("UPDATED THE PRODUCT")
+    res.redirect('/admin/products')
+})
+  .catch(err => {
+    console.log(err);
+  })
 
-  // res.redirect('/admin/products')
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -53,16 +62,15 @@ exports.getEditProduct = (req, res, next) => {
 
   const prodId = req.params.productId;
 
-  Product.findById(prodId)
-  .then(result => {
-    console.log(result); // Check the format of the result
-    const [product] = result;
+  Product.findByPk(prodId)
+  .then(product => {
+   
     if (!product) {
       return res.redirect('/');
     }
 
     res.render('admin/edit-product', {
-      product: product[0],
+      product: product,
       pageTitle: 'Edit Product',
       editing: editMode,
       path: '/admin/edit-product'
@@ -91,31 +99,31 @@ exports.getEditProduct = (req, res, next) => {
 
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-  .then(([rows, fieldData]) => {
+ 
+  Product.findAll()
+  .then( products => {
     res.render('admin/products', {
-      prods: rows,
+      prods: products,
       pageTitle: 'Admin Products',
       path: '/admin/products'
     });
-  } )
-  .catch(err => console.log(err))
-
-  // Product.fetchAll(products => {
-  //   res.render('admin/products', {
-  //     prods: products,
-  //     pageTitle: 'Admin Products',
-  //     path: '/admin/products'
-  //   });
-  // });
+})
+  .catch( err => {
+    console.log(err)
+  })
+ 
 };
 
 exports.postDeleteProduct = (req, res, next) => {
   const productId = req.body.productId;
 
   
-  Product.deleteProductById(productId)
-  .then(() => {
+  Product.findByPk(productId)
+  .then(product => {
+    return product.destroy();
+  })
+  .then((result) => {
+    console.log("DELETED THE PRODUCT")
     res.redirect('/admin/products');
   })
   .catch(err => console.log(err));
