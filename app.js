@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
     User.findById('669f0b7d9e4a47cf464d4102')
     .then(user => {
-        req.user = user;
+        req.user = new User(user.name, user.email, user.cart, user._id);
         next();
 
     })
