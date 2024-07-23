@@ -121,33 +121,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
 exports.postOrder = (req, res, next) => {
   let fetchedCart;
-  req.user.getCart()
-    .then(cart => {
-
-      if (!cart) {
-        throw new Error('Cart not found for the user.');
-      }
-
-      fetchedCart = cart;
-
-      return cart.getProducts();
-    })
-    .then(products => {
-      if (!products || products.length === 0) {
-        throw new Error('No products found in the cart.');
-      }
-
-      return req.user.createOrder()
-        .then(order => {
-          return order.addProducts(products.map(product => {
-            product.orderItem = { quantity: product.cartItem.quantity };
-            return product;
-          }));
-        });
-    })
-    .then(result => {
-      return fetchedCart.setProducts(null);
-    })
+  req.user.addOrder()
     .then( result => {
       console.log('Order processed successfully.');
       res.redirect('/orders');
@@ -163,7 +137,7 @@ exports.postOrder = (req, res, next) => {
 
 exports.getOrders = (req, res, next) => {
 
-  req.user.getOrders({include: ['products']})
+  req.user.getOrders()
   .then(orders => {
     console.log(orders)
     res.render('shop/orders', {
