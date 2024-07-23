@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const errorController = require('./controllers/error');
 const mongoConnect = require('./util/database').mongoConnect;
+const User =  require('./models/user');
 
 const app = express();
 
@@ -22,17 +23,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-    // User.findByPk(1)
-    // .then(user => {
-    //     req.user = user;
-    //     next();
+    User.findById('669f0b7d9e4a47cf464d4102')
+    .then(user => {
+        req.user = user;
+        next();
 
-    // })
-    // .catch(err => {
-    //     console.log(err);
-    //     next(); // Ensure next() is called even if there's an error
-    // });
-    next();
+    })
+    .catch(err => {
+        console.log(err);
+        next();
+    });
 })
 
 app.use('/admin', adminRoutes);
