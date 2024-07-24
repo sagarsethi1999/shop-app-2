@@ -1,6 +1,6 @@
 const mongodb = require('mongodb');
 const { getCart } = require('../controllers/shop');
-const getDb = require('../util/database').getDb;
+// const getDb = require('../util/database').getDb;
 
 const ObjectId = mongodb.ObjectId;
 
